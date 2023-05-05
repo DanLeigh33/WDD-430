@@ -4,12 +4,12 @@
             <div class="panel-heading">
                 <div class="row">
                     <div class="col-xs-12">
-                        <h2><!--Name here--></h2>
+                        <h2>{{ contact.name }}</h2>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-xs-6">
-                        <img src="" alt="">
+                        <img [src]="contact.imageUrl" alt="{{contact.name}}">
                     </div>
                     <div class="col-xs-6">
                         <a href="#" class="btn btn-primary pnlBtn">Edit</a>
@@ -20,8 +20,8 @@
             <div class="panel-body">
                 <div class="row">
                     <div class="col-xs-12">
-                        <p><b>Email:</b> </p>
-                        <p><b>Phone:</b></p>
+                        <p><b>Email: </b>{{ contact.email }} </p>
+                        <p><b>Phone: </b>{{ contact.phone }}</p>
                     </div>
                 </div>
             </div>
