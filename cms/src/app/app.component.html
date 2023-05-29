@@ -1,10 +1,8 @@
-<app-header (featureSelectedEvent)="switchView($event)"></app-header>
+<app-header></app-header>
 <div class="container">
   <div class="row">
     <div class="col-md-12">
-      <app-contacts *ngIf="loadedFeature === 'contacts'"></app-contacts>
-      <app-documents *ngIf="loadedFeature === 'documents'"></app-documents>
-      <app-message-list *ngIf="loadedFeature === 'messages'"></app-message-list>
+      <router-outlet></router-outlet>
     </div>
   </div>
 </div>

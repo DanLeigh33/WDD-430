@@ -26,7 +26,7 @@ export class MessageListComponent implements OnInit {
 
   //onAddMessage(message: Message) {
     //this.messages.push(message);
-    //(addMessageEvent)="onAddMessage($event)"
+    //(addMessageEvent)="onAddMessage($event)" goes in html app-message-edit
   //}
 
 
