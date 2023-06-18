@@ -45,7 +45,7 @@ ngOnInit(): void {
 onSubmit(form: NgForm){
   let value = form.value // get values from form’s fields
   let  newDocument = new Document(value.id, value.name, value.description, value.url, value.group)
-   if (this.editMode = true) {
+   if (this.editMode == true) {
     this.documentService.updateDocument(this.originalDocument, newDocument)
    }
    else{

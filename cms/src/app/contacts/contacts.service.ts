@@ -2,12 +2,13 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {Contact} from './contact.model';
 import {MOCKCONTACTS} from './MOCKCONTACTS';
 import { Subject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ContactService {
-   contacts: Contact[];
+   contacts: Contact[] =[];
    maxDocumentId: number;
 
    contactSelectedEvent = new EventEmitter<Contact>();
@@ -15,35 +16,47 @@ export class ContactService {
 
    contactListChangedEvent = new Subject<Contact[]>();
 
-   constructor() {
-      this.contacts = MOCKCONTACTS;
+   constructor(private http: HttpClient) {
       this.maxDocumentId = this.getMaxId();
    }
 
    getContacts() {
-    return this.contacts.slice();
+      this.http.get('https://cmswfs-63f40-default-rtdb.firebaseio.com/contacts.json').subscribe(
+         // success method
+         (contacts: Contact[] ) => {
+            this.contacts = contacts;
+            this.maxDocumentId = this.getMaxId()
+            this.contacts.sort()
+            console.log(this.contacts)
+            this.contactListChangedEvent.next(this.contacts.slice())
+         },
+            // error method
+         (error: any) => {
+            console.log(error)
+       })
+   }
+
+   storeContacts(contacts: Contact[]) {
+      let stringCon = JSON.stringify(contacts)
+      this.http.put('https://cmswfs-63f40-default-rtdb.firebaseio.com/contacts.json', stringCon,
+      {
+         headers: new HttpHeaders({'Content-Type': 'application/json'})
+      })
+      .subscribe(response => {
+         console.log(response)
+         this.contactListChangedEvent.next(this.contacts.slice())
+      })
    }
 
    getContact(id: string): Contact {
-   for (var i = 0; i < this.contacts.length; i++) {
-    if (id == this.contacts[i].id) {
+      console.log(this.contacts.length)
+      for (var i = 0; i < this.contacts.length; i++) {
+      if (id == this.contacts[i].id) {
         return this.contacts[i]
-    }
-   }
+      }
+      }
     return null;
    }
-
-   deleteContact(contact: Contact) {
-      if (!contact) {
-         return;
-        }
-      const pos = this.contacts.indexOf(contact);
-      if (pos < 0) {
-         return;
-        }
-      this.contacts.splice(pos, 1);
-      this.contactChangedEvent.emit(this.contacts.slice());
-     }
 
    getMaxId(): number {
 
@@ -55,10 +68,11 @@ export class ContactService {
             maxId = currentId;
          }
       }
-      return maxId
+      return maxId;
 }
 
    addContact(newContact: Contact) {
+      console.log('add contact called');
       if (!newContact) {
          return
       }
@@ -66,9 +80,9 @@ export class ContactService {
       this.maxDocumentId++
       newContact.id = String(this.maxDocumentId);
       this.contacts.push(newContact);
+      console.log(this.contacts);
 
-      var contactsListClone = this.contacts.slice();
-      this.contactListChangedEvent.next(contactsListClone);
+      this.storeContacts(this.contacts);
    }
 
    updateContact(originalContact: Contact, newContact: Contact) {
@@ -83,12 +97,11 @@ export class ContactService {
 
       newContact.id = originalContact.id
       this.contacts[pos] = newContact
-      var contactsListClone = this.contacts.slice()
-      this.contactListChangedEvent.next(contactsListClone)
+      this.storeContacts(this.contacts);
    }
 
    
-   deleteContact1(contact: Contact) {
+   deleteContact(contact: Contact) {
 
       if (!contact) {
          return;
@@ -98,8 +111,7 @@ export class ContactService {
          return;
         }
       this.contacts.splice(pos, 1);
-      var contactsListClone = this.contacts.slice()
-      this.contactListChangedEvent.next(contactsListClone);
+      this.storeContacts(this.contacts);
 
    }
 }

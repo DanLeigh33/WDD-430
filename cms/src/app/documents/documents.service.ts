@@ -2,12 +2,13 @@ import {EventEmitter, Injectable} from '@angular/core';
 import {MOCKDOCUMENTS} from './MOCKDOCUMENTS';
 import { Document } from './document.model';
 import { Subject } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DocumentService {
-   documents: Document[];
+   documents: Document[] = [];
    maxDocumentId: number;
 
    selectedDocumentEvent = new EventEmitter<Document>();
@@ -15,13 +16,36 @@ export class DocumentService {
    documentListChangedEvent = new Subject<Document[]>();
 
 
-   constructor() {
-      this.documents = MOCKDOCUMENTS;
+   constructor(private http: HttpClient) {
       this.maxDocumentId = this.getMaxId();
    }
 
    getDocuments() {
-    return this.documents.slice();
+      this.http.get('https://cmswfs-63f40-default-rtdb.firebaseio.com/documents.json').subscribe(
+         // success method
+         (documents: Document[] ) => {
+            this.documents = documents;
+            this.maxDocumentId = this.getMaxId()
+            this.documents.sort()
+            console.log(this.documents)
+            this.documentListChangedEvent.next(this.documents.slice())
+         },
+            // error method
+         (error: any) => {
+            console.log(error)
+       })
+   }
+
+   storeDocuments(documents: Document[]) {
+      let stringDoc = JSON.stringify(documents)
+      this.http.put('https://cmswfs-63f40-default-rtdb.firebaseio.com/documents.json', stringDoc,
+      {
+         headers: new HttpHeaders({'Content-Type': 'application/json'})
+      })
+      .subscribe(response => {
+         console.log(response)
+         this.documentListChangedEvent.next(this.documents.slice())
+      })
    }
 
    getDocument(id: string) {
@@ -32,18 +56,6 @@ export class DocumentService {
        }
         return null;
        }
-
-   deleteDocument(document: Document) {
-      if (!document) {
-         return;
-        }
-      const pos = this.documents.indexOf(document);
-      if (pos < 0) {
-         return;
-        }
-      this.documents.splice(pos, 1);
-      this.documentChangedEvent.emit(this.documents.slice());
-     }
 
      
    getMaxId(): number {
@@ -69,8 +81,7 @@ export class DocumentService {
       newDocument.id = String(this.maxDocumentId);
       this.documents.push(newDocument);
 
-      var documentsListClone = this.documents.slice();
-      this.documentListChangedEvent.next(documentsListClone);
+      this.storeDocuments(this.documents);
    }
 
    updateDocument(originalDocument: Document, newDocument: Document) {
@@ -85,12 +96,11 @@ export class DocumentService {
 
       newDocument.id = originalDocument.id
       this.documents[pos] = newDocument
-      var documentsListClone = this.documents.slice()
-      this.documentListChangedEvent.next(documentsListClone)
+      this.storeDocuments(this.documents);
    }
 
    
-   deleteDocument1(document: Document) {
+   deleteDocument(document: Document) {
 
       if (!document) {
          return;
@@ -100,8 +110,7 @@ export class DocumentService {
          return;
         }
       this.documents.splice(pos, 1);
-      var documentsListClone = this.documents.slice()
-      this.documentListChangedEvent.next(documentsListClone);
+      this.storeDocuments(this.documents);
 
    }
 

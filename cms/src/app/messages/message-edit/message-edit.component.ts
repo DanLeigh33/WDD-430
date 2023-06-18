@@ -10,7 +10,7 @@ import { MessageService } from '../message.service';
 export class MessageEditComponent {
   @ViewChild('subject') subjectInputRef: ElementRef;
   @ViewChild('msgText') msgTextInputRef: ElementRef;
-  currentSender = '18';
+  currentSender = '19';
 
   constructor(private messService: MessageService) {
     
