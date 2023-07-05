@@ -20,7 +20,7 @@ export class ContactDetailComponent implements OnInit{
     ngOnInit(): void {
       this.route.params.subscribe(
         (params: Params) => {
-            this.contact = this.contactService.getContact(params['id']);
+            this.contact = this.contactService.getDetailContact(params['id']);
         }
        )
     }

@@ -1,6 +1,5 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {Contact} from './contact.model';
-import {MOCKCONTACTS} from './MOCKCONTACTS';
 import { Subject } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
@@ -21,13 +20,12 @@ export class ContactService {
    }
 
    getContacts() {
-      this.http.get('https://cmswfs-63f40-default-rtdb.firebaseio.com/contacts.json').subscribe(
+      this.http.get('http://localhost:3000/contacts').subscribe(
          // success method
          (contacts: Contact[] ) => {
-            this.contacts = contacts;
+            this.contacts = contacts['contacts'];
             this.maxDocumentId = this.getMaxId()
             this.contacts.sort()
-            console.log(this.contacts)
             this.contactListChangedEvent.next(this.contacts.slice())
          },
             // error method
@@ -49,14 +47,24 @@ export class ContactService {
    }
 
    getContact(id: string): Contact {
-      console.log(this.contacts.length)
+
       for (var i = 0; i < this.contacts.length; i++) {
-      if (id == this.contacts[i].id) {
+      if (id == this.contacts[i]._id) {
         return this.contacts[i]
       }
       }
     return null;
    }
+
+   getDetailContact(id: string): Contact {
+
+    for (var i = 0; i < this.contacts.length; i++) {
+    if (id == this.contacts[i].id) {
+      return this.contacts[i]
+    }
+    }
+  return null;
+ }
 
    getMaxId(): number {
 
@@ -71,47 +79,82 @@ export class ContactService {
       return maxId;
 }
 
-   addContact(newContact: Contact) {
-      console.log('add contact called');
-      if (!newContact) {
-         return
-      }
-
-      this.maxDocumentId++
-      newContact.id = String(this.maxDocumentId);
-      this.contacts.push(newContact);
-      console.log(this.contacts);
-
-      this.storeContacts(this.contacts);
+addContact(contact: Contact) {
+   if (!contact) {
+    return;
    }
 
-   updateContact(originalContact: Contact, newContact: Contact) {
-      if (!originalContact  || !newContact) {
-         return
-      }
+  
+   contact.id = '';
 
-      var pos = this.contacts.indexOf(originalContact)
-      if (pos < 0) {
-         return
-      } 
+   const headers = new HttpHeaders({'Content-Type': 'application/json'});
 
-      newContact.id = originalContact.id
-      this.contacts[pos] = newContact
-      this.storeContacts(this.contacts);
-   }
+   // add to database
+   this.http.post<{ message: string, contact: Contact }>('http://localhost:3000/contacts',
+   contact,
+   { headers: headers })
+   .subscribe(
+      (responseData) => {
+        
+         this.contacts.push(responseData.contact);
+         this.contacts.sort()
+         this.contactListChangedEvent.next(this.contacts.slice())
+    }
+  );
+}
 
-   
-   deleteContact(contact: Contact) {
 
-      if (!contact) {
-         return;
-        }
-      const pos = this.contacts.indexOf(contact);
-      if (pos < 0) {
-         return;
-        }
+updateContact(originalContact: Contact, newContact: Contact) {
+if (!originalContact || !newContact) {
+  return;
+}
+
+const pos = this.contacts.findIndex(d => d.id === originalContact.id);
+
+if (pos < 0) {
+  return;
+}
+
+// set the id of the new Document to the id of the old Document
+newContact.id = originalContact.id;
+newContact._id = originalContact._id;
+
+const headers = new HttpHeaders({'Content-Type': 'application/json'});
+
+// update database
+this.http.put('http://localhost:3000/contacts/' + originalContact.id,
+  newContact, { headers: headers })
+  .subscribe(
+    (response: Response) => {
+      this.contacts[pos] = newContact;
+      this.contacts.sort()
+      this.contactListChangedEvent.next(this.contacts.slice())
+    }
+  );
+}
+
+
+
+deleteContact(contact: Contact) {
+
+if (!contact) {
+  return;
+}
+
+const pos = this.contacts.findIndex(d => d.id === contact.id);
+
+if (pos < 0) {
+  return;
+}
+
+// delete from database
+this.http.delete('http://localhost:3000/contacts/' + contact.id)
+  .subscribe(
+    (response: Response) => {
       this.contacts.splice(pos, 1);
-      this.storeContacts(this.contacts);
-
-   }
+      this.contacts.sort()
+      this.contactListChangedEvent.next(this.contacts.slice())
+    }
+  );
+}
 }

@@ -1,4 +1,5 @@
 export class Contact {
+    public _id: string;
     public id: string;
     public name: string;
     public email: string;
@@ -6,7 +7,8 @@ export class Contact {
     public imageUrl: string;
     public group: Contact[];
 
-    constructor(id: string, name: string, email: string, phone: string, imageUrl: string, group: Contact[]){
+    constructor(_id: string, id: string, name: string, email: string, phone: string, imageUrl: string, group: Contact[]){
+        this._id = _id;
         this.id = id;
         this.name = name;
         this.email = email;

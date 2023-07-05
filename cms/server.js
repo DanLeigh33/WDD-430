@@ -2,6 +2,7 @@
 var express = require('express');
 var path = require('path');
 var http = require('http');
+var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
@@ -24,6 +25,9 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 
 app.use(logger('dev')); // Tell express to use the Morgan logger
+
+mongoose.connect('mongodb+srv://daniV:artist123@cluster0.ymx3eyp.mongodb.net/cms?retryWrites=true&w=majority',
+   { useNewUrlParser: true }).then(() => console.log('Connected to database!')).catch((err) => { console.error(err); });
 
 // Add support for CORS
 app.use((req, res, next) => {

@@ -1,4 +1,4 @@
-import { MOCKMESSAGES } from "./MOCKMESSAGES";
+
 import { Message } from "./message.model";
 import {EventEmitter, Injectable} from "@angular/core";
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -17,10 +17,10 @@ export class MessageService {
     }
 
     getMessages() {
-         this.http.get('https://cmswfs-63f40-default-rtdb.firebaseio.com/messages.json').subscribe(
+      this.http.get('http://localhost:3000/messages').subscribe(
          // success method
          (messages: Message[] ) => {
-            this.messages = messages;
+            this.messages = messages['messages'];
             this.maxMessagesId = this.getMaxId()
             this.messages.sort()
             this.messageChangeEvent.emit(this.messages.slice())
@@ -29,7 +29,7 @@ export class MessageService {
          (error: any) => {
             console.log(error)
        })
-       }
+   }
 
     storeMessages(messages: Message[]) {
         let stringMes = JSON.stringify(messages)
@@ -53,10 +53,27 @@ export class MessageService {
     }
 
     addMessage(message: Message) {
-        this.messages.push(message);
-        this.storeMessages(this.messages);
-    }
-
+      if (!message) {
+       return;
+      }
+   
+      message.id = '';
+   
+      const headers = new HttpHeaders({'Content-Type': 'application/json'});
+   
+      // add to database
+      this.http.post<{ message: string, messages: Message }>('http://localhost:3000/messages',
+      message,
+      { headers: headers })
+      .subscribe(
+         (responseData) => {
+            // add new document to documents
+            this.messages.push(responseData.messages);
+            this.messages.sort()
+            this.messageChangeEvent.emit(this.messages.slice())
+       }
+     );
+   }
     getMaxId(): number {
 
         var maxId = 0;
