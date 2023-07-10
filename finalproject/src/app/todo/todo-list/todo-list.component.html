@@ -1,0 +1,19 @@
+<div class="row">
+    <div class="col-md-5">
+       <div class="panel panel-default">
+          <div class="panel-heading">
+             <div class="row pad-left-right">
+                <span class="titlef pull-left">TO DO LIST: </span>
+             </div>
+          </div>
+          <div class="panel-body">
+             <div class="row">
+                <div class="col-xs-12">
+                  <app-todo-item *ngFor="let todoEl of todos"
+                  [todo]="todoEl"></app-todo-item>
+                </div>
+             </div>
+            </div>
+       </div>
+    </div>
+ </div>

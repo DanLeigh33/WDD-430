@@ -1,0 +1,10 @@
+.titlef {
+    font-weight: bold;
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
+    margin: 5px;
+}
+.panel {
+ margin-top: 40px;
+ margin-left: 20px;
+}

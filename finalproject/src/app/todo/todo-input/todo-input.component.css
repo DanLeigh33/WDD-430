@@ -1,0 +1,9 @@
+label, input, button {
+    margin-bottom: 5px;
+}
+
+label, button {
+    font-weight: bold;
+    font-family: 'Times New Roman', Times, serif;
+    font-style: italic;
+}
